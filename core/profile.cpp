@@ -39,7 +39,7 @@ const std::vector<Profile>& builtins() {
         std::vector<Profile> p;
         p.push_back(Profile{
             L"Quick Clean",
-            L"Caches, logs, dumps. Safe daily use.",
+            L"Caches, logs and crash reports. Steam rebuilds all of it.",
             {"steam.dumps", "steam.logs", "steam.appcache", "steam.appcache_stats",
              "steam.depotcache", "steam.shadercache", "steam.workshop_temp",
              "steam.steamapps_downloading", "steam.avatarcache", "steam.tenfoot_httpcache",
@@ -48,9 +48,8 @@ const std::vector<Profile>& builtins() {
             false});
         p.push_back(Profile{
             L"Account Reset",
-            L"Quick Clean plus account residue. Surgically edits config.vdf and loginusers.vdf so "
-            L"preserved accounts stay logged in. Removes ssfn files, autologin registry, htmlcache, "
-            L"browser cookies, per-account caches.",
+            L"Quick Clean, plus saved sign-ins and Steam's cookies in your browsers. Excluded accounts "
+            L"stay signed in.",
             {"steam.dumps", "steam.logs", "steam.appcache", "steam.appcache_stats",
              "steam.depotcache", "steam.shadercache", "steam.workshop_temp",
              "steam.steamapps_downloading", "steam.avatarcache", "steam.tenfoot_httpcache",
@@ -64,8 +63,8 @@ const std::vector<Profile>& builtins() {
             false});
         p.push_back(Profile{
             L"Full Wipe",
-            L"Account Reset plus userdata folders, controller bindings, screenshots, and non-Steam "
-            L"shortcuts for non-preserved accounts. Destructive.",
+            L"Account Reset, plus game saves, screenshots and controller layouts. Excluded accounts "
+            L"are kept.",
             {"steam.dumps", "steam.logs", "steam.appcache", "steam.appcache_stats",
              "steam.depotcache", "steam.shadercache", "steam.workshop_temp",
              "steam.steamapps_downloading", "steam.avatarcache", "steam.tenfoot_httpcache",
@@ -81,8 +80,8 @@ const std::vector<Profile>& builtins() {
             true});
         p.push_back(Profile{
             L"Game Reset",
-            L"Wipe selected AppIDs from each account's userdata. Other accounts and other games "
-            L"are untouched. Pick AppIDs in the Cleaner screen.",
+            L"Saves and settings of the games you choose. Other games and excluded accounts are left "
+            L"alone.",
             {"steam.userdata"},
             {},  // populated by UI
             false});

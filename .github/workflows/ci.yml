@@ -8,26 +8,35 @@ on:
 
 jobs:
   build:
-    name: Build (${{ matrix.config }})
-    runs-on: windows-2022
-    strategy:
-      fail-fast: false
-      matrix:
-        config: [Debug, Release]
+    name: Build and test
+    # Windows Server 2025 with Visual Studio 2026 (generator "Visual Studio 18 2026"), the image
+    # Facet's own CI uses. The label names the image, so a move of windows-latest does not
+    # change the compiler.
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 90
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v2
+      # Fetches Facet at the pinned commit, and through it Dear ImGui, FreeType and lunasvg.
+      - name: Configure
+        run: cmake --preset vs2026
 
-      - name: Build
-        run: msbuild steam-tracer-cleaner.sln /p:Configuration=${{ matrix.config }} /p:Platform=x64 /m
+      - name: Build Debug
+        run: cmake --build --preset vs2026-debug --parallel
+
+      - name: Build Release
+        run: cmake --build --preset vs2026-release --parallel
+
+      - name: Test Debug
+        run: ctest --preset vs2026-debug
+
+      - name: Test Release
+        run: ctest --preset vs2026-release
 
       - name: Upload artifact
-        if: matrix.config == 'Release'
         uses: actions/upload-artifact@v4
         with:
           name: steam-tracer-cleaner-${{ github.sha }}
-          path: build/Release/steam-tracer-cleaner.exe
+          path: build/vs2026/bin/Release/steam-tracer-cleaner.exe
           if-no-files-found: error

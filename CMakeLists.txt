@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 3.20)
+# 3.28: Facet (third_party/CMakeLists.txt) declares its dependencies with EXCLUDE_FROM_ALL and SYSTEM.
+cmake_minimum_required(VERSION 3.28)
 
 project(steam-tracer-cleaner
-    VERSION 1.1.2
+    VERSION 2.0.0
     DESCRIPTION "Cleans Steam account residue and installs autoexec / video configs"
     LANGUAGES C CXX
 )
@@ -20,11 +21,15 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD 11)
 
 if(MSVC)
-    # CXX-only — otherwise /std:c++latest collides with /std:c11 on the vendored SQLite C amalgamation.
+    # CXX-only, otherwise /std:c++latest collides with /std:c11 on the vendored SQLite C amalgamation.
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/std:c++latest>)
 endif()
 
-# Static CRT so the binary runs without VC++ Redistributable.
+# Static CRT so the binary runs without the VC++ Redistributable. The variable reaches every
+# subdirectory, Facet and the dependencies it fetches included. Those dependencies declare their
+# own cmake_minimum_required; the policy default makes the variable effective there even if one
+# of them predates CMP0091.
+set(CMAKE_POLICY_DEFAULT_CMP0091 NEW)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/compile_options.cmake)

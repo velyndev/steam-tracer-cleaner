@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <!-- Steam Tracer Cleaner app icon, simplified drawing for the 16 to 24 px frames (see icon.svg).
+       Drawn on the 16 px pixel grid: the tile fills the frame, and two arches with 2 px strokes
+       and 2 px gaps replace the three ridges, so they stay apart at title bar size. The arches
+       sit one pixel right of center so every leg edge lands on a pixel edge; the wiped corner
+       balances the offset. -->
+  <defs>
+    <clipPath id="wipe">
+      <path d="M0 0H16V7L7 16H0Z"/>
+    </clipPath>
+  </defs>
+  <path d="M4.875 0H11.125C15.0868 0 16 0.91325 16 4.875V11.125C16 15.0868 15.0868 16 11.125 16H4.875C0.91325 16 0 15.0868 0 11.125V4.875C0 0.91325 0.91325 0 4.875 0Z" fill="#4FB0FF"/>
+  <g clip-path="url(#wipe)" fill="none" stroke="#111113" stroke-width="2">
+    <path d="M3 14V9A6 6 0 0 1 15 9V14"/>
+    <path d="M7 14V9A2 2 0 0 1 11 9V14"/>
+  </g>
+</svg>

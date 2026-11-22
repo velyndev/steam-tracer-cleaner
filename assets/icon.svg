@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- Steam Tracer Cleaner app icon, master drawing on a 256 grid (32 px and up).
+       Tile: the accent (#4FB0FF) rounded square with continuous corners, like the app's cards.
+       Mark: three nested arches, the ridges of a fingerprint (the traces an account leaves),
+       with everything past one diagonal wiped clean.
+       Strokes and leg positions sit on the 32 px grid (8 units = 1 px there).
+       Small sizes use icon-small.svg. Regenerate assets/icon.ico with tools/make_icon.py. -->
+  <defs>
+    <clipPath id="wipe">
+      <path d="M0 0H256V72L72 256H0Z"/>
+    </clipPath>
+  </defs>
+  <path d="M80 8H176C234.512 8 248 21.488 248 80V176C248 234.512 234.512 248 176 248H80C21.488 248 8 234.512 8 176V80C8 21.488 21.488 8 80 8Z" fill="#4FB0FF"/>
+  <g clip-path="url(#wipe)" fill="none" stroke="#111113" stroke-width="16" stroke-linecap="round">
+    <path d="M40 208V128A88 88 0 0 1 216 128V208"/>
+    <path d="M72 208V128A56 56 0 0 1 184 128V208"/>
+    <path d="M104 208V128A24 24 0 0 1 152 128V208"/>
+  </g>
+</svg>

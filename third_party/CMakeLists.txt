@@ -1,22 +1,30 @@
-# Vendored third-party libraries. No external package manager required.
+# Third-party libraries. spdlog, nlohmann/json, doctest and SQLite are vendored here; Facet is
+# fetched (below) and fetches Dear ImGui, FreeType and lunasvg itself.
 
-# Dear ImGui (docking branch). Compiled as a static lib so warnings stay quiet.
-add_library(stc_imgui STATIC
-    imgui/imgui.cpp
-    imgui/imgui_demo.cpp
-    imgui/imgui_draw.cpp
-    imgui/imgui_tables.cpp
-    imgui/imgui_widgets.cpp
-    imgui/backends/imgui_impl_win32.cpp
-    imgui/backends/imgui_impl_dx11.cpp
+# --- Facet -------------------------------------------------------------------------------------
+# The UI framework, pinned to one commit. To build against a local checkout instead of the
+# download, configure with
+#   -DFETCHCONTENT_SOURCE_DIR_FACET=C:/path/to/imgui-design-framework
+# (or put that cache variable in a CMakeUserPresets.json). The local checkout should be at the
+# pinned commit, otherwise the build is not the one CI makes.
+#
+# Facet then fetches Dear ImGui v1.93.0 (with FreeType) and lunasvg. Dear ImGui is its target
+# facet::imgui, which defines IMGUI_DISABLE_OBSOLETE_FUNCTIONS publicly; the Win32 and DX11
+# backends are facet::imgui_backends.
+include(FetchContent)
+
+# Normal variables: Facet's option() calls take them (CMP0077 is NEW in Facet's scope).
+set(FACET_BUILD_DEMO OFF)
+set(FACET_BUILD_TESTS OFF)
+set(FACET_BUILD_CONSUMER_TEST OFF)
+
+FetchContent_Declare(facet
+    GIT_REPOSITORY https://github.com/velyndev/imgui-facet.git
+    GIT_TAG        6efdc2274976500aad0694d1970aef38c808e640
 )
-target_include_directories(stc_imgui PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/imgui
-    ${CMAKE_CURRENT_LIST_DIR}/imgui/backends
-)
-if(MSVC)
-    target_compile_options(stc_imgui PRIVATE /W0)
-endif()
+FetchContent_MakeAvailable(facet)
+
+# --- Vendored ----------------------------------------------------------------------------------
 
 # spdlog. Header-only, with std::format used so we don't drag fmt in.
 add_library(stc_spdlog INTERFACE)

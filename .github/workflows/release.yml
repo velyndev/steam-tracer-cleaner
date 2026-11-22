@@ -9,25 +9,50 @@ permissions:
 
 jobs:
   release:
-    runs-on: windows-2022
+    # The same image and preset as CI (see ci.yml).
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 90
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v2
+      - name: Configure
+        run: cmake --preset vs2026
 
       - name: Build Release
-        run: msbuild steam-tracer-cleaner.sln /p:Configuration=Release /p:Platform=x64 /m
+        run: cmake --build --preset vs2026-release --parallel
+
+      - name: Test Release
+        run: ctest --preset vs2026-release
 
       - name: Stage artifacts
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Copy-Item build/Release/steam-tracer-cleaner.exe dist/steam-tracer-cleaner.exe
+          Copy-Item build/vs2026/bin/Release/steam-tracer-cleaner.exe dist/steam-tracer-cleaner.exe
           Copy-Item LICENSE dist/LICENSE.txt
+          Copy-Item THIRD_PARTY_NOTICES.md dist/THIRD_PARTY_NOTICES.md
+          Copy-Item CHANGELOG.md dist/CHANGELOG.md
           Copy-Item README.md dist/README.md
           Compress-Archive -Path dist/* -DestinationPath dist/steam-tracer-cleaner-${{ github.ref_name }}-x64.zip -Force
+
+      # The release text is this version's section of CHANGELOG.md; GitHub's generated notes
+      # (the commit list) are appended after it.
+      - name: Write release notes
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          $lines = Get-Content CHANGELOG.md
+          $header = $lines | Select-String -Pattern ('^## ' + [regex]::Escape($version) + '\b') | Select-Object -First 1
+          if (-not $header) {
+            throw "CHANGELOG.md has no section for $version"
+          }
+          $body = @($lines | Select-Object -Skip $header.LineNumber)
+          $next = $body | Select-String -Pattern '^## ' | Select-Object -First 1
+          if ($next) {
+            $body = @($body | Select-Object -First ($next.LineNumber - 1))
+          }
+          $body | Out-File release-notes.md -Encoding utf8
 
       - name: Compute checksums
         shell: pwsh
@@ -43,5 +68,6 @@ jobs:
             dist/steam-tracer-cleaner.exe.sha256
             dist/steam-tracer-cleaner-${{ github.ref_name }}-x64.zip
             dist/steam-tracer-cleaner-${{ github.ref_name }}-x64.zip.sha256
+          body_path: release-notes.md
           generate_release_notes: true
           draft: false

@@ -435,128 +435,146 @@ std::vector<Operation> resolve_appmanifests(const ResolveContext& ctx) {
 const std::vector<Target>& catalog() {
     static const std::vector<Target> targets = [] {
         std::vector<Target> t;
-        t.push_back(Target{"steam.dumps", L"Crash dumps",
-                           L"Steam-side minidumps and ETL traces under <install>/dumps and *.dmp at the root.",
+        t.push_back(Target{"steam.dumps", L"Steam crash reports",
+                           L"Files Steam writes when it crashes. Nothing you use is lost. "
+                           L"The dumps folder and .dmp files in the Steam folder.",
                            TargetCategory::CrashDump, &resolve_dumps});
-        t.push_back(Target{"steam.logs", L"Logs",
-                           L"<install>/logs plus GameOverlay logs and *.last status files.",
+        t.push_back(Target{"steam.logs", L"Steam logs",
+                           L"Records of what Steam did. Steam starts new ones. "
+                           L"The logs folder, overlay logs and .last files in the Steam folder.",
                            TargetCategory::Log, &resolve_logs});
-        t.push_back(Target{"steam.appcache", L"Appcache (httpcache + librarycache)",
-                           L"appinfo.vdf, packageinfo.vdf, library thumbnails, web image cache.",
+        t.push_back(Target{"steam.appcache", L"Store and library data",
+                           L"Steam downloads it again, so the library looks bare for a moment after "
+                           L"the next start. appcache: httpcache, librarycache, appinfo.vdf, packageinfo.vdf.",
                            TargetCategory::Cache, &resolve_appcache});
-        t.push_back(Target{"steam.depotcache", L"Depot manifests",
-                           L".manifest files leak owned-game history. Deleted across every Steam library drive.",
+        t.push_back(Target{"steam.depotcache", L"Download manifests",
+                           L"Lists of downloaded game files, which also show which games this PC "
+                           L"had. Steam gets them again when it updates a game. The depotcache folder of each library.",
                            TargetCategory::Cache, &resolve_depotcache});
         t.push_back(Target{"steam.shadercache", L"Shader cache",
-                           L"Per-AppID compiled shader pipelines. Rebuilds on next launch.",
+                           L"Graphics data games prepare on their first start. Games build it again, "
+                           L"so that first start can stutter. steamapps\\shadercache in each library.",
                            TargetCategory::Cache, &resolve_shadercache});
-        t.push_back(Target{"steam.workshop_temp", L"Workshop temp + downloads",
-                           L"Partial workshop downloads.", TargetCategory::Cache,
-                           &resolve_workshop_temp});
-        t.push_back(Target{"steam.htmlcache", L"HTML / CEF cache",
-                           L"%LOCALAPPDATA%/Steam/htmlcache plus old <install>/config/htmlcache. "
-                           L"Holds Steam web cookies and store sessions.",
+        t.push_back(Target{"steam.workshop_temp", L"Unfinished Workshop downloads",
+                           L"Workshop items that were still downloading. Steam downloads them again. "
+                           L"steamapps\\workshop\\temp and downloads in each library.",
+                           TargetCategory::Cache, &resolve_workshop_temp});
+        t.push_back(Target{"steam.htmlcache", L"Steam web cache",
+                           L"Pages, cookies and sessions saved by Steam's built-in browser. Steam builds "
+                           L"it again. htmlcache, GPUCache, Code Cache and Local State under %LOCALAPPDATA%\\Steam.",
                            TargetCategory::BrowserResidue, &resolve_htmlcache});
-        t.push_back(Target{"steam.loginusers", L"loginusers.vdf",
-                           L"Account list with AutoLogin tokens. Surgically edited so preserved "
-                           L"accounts survive.",
+        t.push_back(Target{"steam.loginusers", L"Remembered accounts",
+                           L"The accounts on Steam's sign-in screen. They no longer show there; "
+                           L"excluded accounts stay. config\\loginusers.vdf.",
                            TargetCategory::AccountResidue, &resolve_loginusers_vdf});
-        t.push_back(Target{"steam.ssfn", L"Steam Guard sentry files (ssfn*)",
-                           L"Per-account 2FA bypass files. (Legacy: modern Steam no longer creates "
-                           L"ssfn files; auth tokens are now DPAPI-encrypted JWTs in ConnectCache.)",
+        t.push_back(Target{"steam.ssfn", L"Old Steam Guard files",
+                           L"Files older Steam versions used to skip the Steam Guard code. Current "
+                           L"Steam no longer makes them. ssfn files in the Steam folder.",
                            TargetCategory::AccountResidue, &resolve_ssfn_files});
-        t.push_back(Target{"steam.reg.autologin", L"HKCU AutoLoginUser + friends",
-                           L"AutoLoginUser, RememberPassword, LastGameNameUsed, PseudoUUID under "
+        t.push_back(Target{"steam.reg.autologin", L"Sign-in registry values",
+                           L"Which account Steam signs in to on its own, so Steam asks you to sign in "
+                           L"again. With an excluded account, Steam signs in to that one instead. "
+                           L"AutoLoginUser, RememberPassword, LastGameNameUsed and PseudoUUID under "
                            L"HKCU\\Software\\Valve\\Steam.",
                            TargetCategory::AccountResidue, &resolve_auto_login_value});
-        t.push_back(Target{"steam.reg.users", L"HKCU\\...\\Steam\\Users\\<SteamID64>",
-                           L"Per-account subtree under HKCU. Preserved accounts are skipped. "
-                           L"(Legacy: removed in modern Steam client.)",
+        t.push_back(Target{"steam.reg.users", L"Per-account registry keys",
+                           L"Settings older Steam versions kept for each account. Excluded accounts "
+                           L"are skipped. HKCU\\Software\\Valve\\Steam\\Users.",
                            TargetCategory::AccountResidue, &resolve_users_subtree});
-        t.push_back(Target{"steam.reg.activeprocess", L"HKCU\\...\\Steam\\ActiveProcess",
-                           L"Active Steam process state. Recreated at next launch.",
+        t.push_back(Target{"steam.reg.activeprocess", L"Running Steam notes",
+                           L"Registry notes about the running Steam process. Steam writes them again "
+                           L"when it starts. HKCU\\Software\\Valve\\Steam\\ActiveProcess.",
                            TargetCategory::AccountResidue, &resolve_active_process});
-        t.push_back(Target{"steam.remoteclients", L"Remote clients + coplay",
-                           L"remoteclients.vdf and coplay_* friend session caches.",
+        t.push_back(Target{"steam.remoteclients", L"Streaming devices and co-play",
+                           L"Devices Steam paired for streaming and the co-play files of recent "
+                           L"sessions. Skipped while any account is excluded. config\\remoteclients.vdf "
+                           L"and coplay files.",
                            TargetCategory::AccountResidue, &resolve_remote_clients});
-        t.push_back(Target{"steam.avatarcache", L"Avatar cache",
-                           L"Cached friend / persona avatars.", TargetCategory::Cache,
-                           &resolve_avatarcache});
-        t.push_back(Target{"steam.userdata", L"Userdata folders",
-                           L"Per-account game saves, cloud sync state, settings. Filtered by ignore list.",
+        t.push_back(Target{"steam.avatarcache", L"Profile pictures",
+                           L"Avatars Steam saved for you and your friends. Steam downloads them again; "
+                           L"those of excluded accounts stay. config\\avatarcache.",
+                           TargetCategory::Cache, &resolve_avatarcache});
+        t.push_back(Target{"steam.userdata", L"Game saves and settings",
+                           L"Each account's local saves, game settings and Steam settings. Only saves "
+                           L"kept in Steam Cloud can come back. Excluded accounts are kept. userdata\\<id>.",
                            TargetCategory::GameData, &resolve_userdata_full});
-        t.push_back(Target{"steam.controller_configs", L"Steam Input bindings",
-                           L"Per-account controller layouts under userdata\\<id>\\config\\controller_configs.",
+        t.push_back(Target{"steam.controller_configs", L"Steam Input layouts",
+                           L"Your controller button layouts. Layouts without a Steam Cloud copy are "
+                           L"lost. userdata\\<id>\\config\\controller_configs and Steam Controller Configs.",
                            TargetCategory::ControllerResidue, &resolve_controller_configs});
-        t.push_back(Target{"browser.steam_cookies", L"Browser Steam cookies",
-                           L"Removes steamcommunity.com and steampowered.com cookies from Chrome, "
-                           L"Edge, Brave, Vivaldi, and Firefox profiles. Browser must be closed.",
+        t.push_back(Target{"browser.steam_cookies", L"Steam cookies in your browsers",
+                           L"Signs you out of the Steam store and community websites in Chrome, Edge, "
+                           L"Brave, Vivaldi and Firefox. Close those browsers first.",
                            TargetCategory::BrowserResidue, &resolve_browser_steam_cookies});
-        t.push_back(Target{"crash.local_appdata", L"Steam-related crash dumps",
-                           L"Removes steam.exe / cs2.exe / csgo.exe / gmod.exe etc. dumps from "
-                           L"%LOCALAPPDATA%\\CrashDumps.",
+        t.push_back(Target{"crash.local_appdata", L"Game crash reports",
+                           L"Crash files of Steam, SteamVR and Valve games such as Counter-Strike 2 and "
+                           L"Dota 2. Nothing you use is lost. %LOCALAPPDATA%\\CrashDumps.",
                            TargetCategory::CrashDump, &resolve_crash_local_appdata});
-        t.push_back(Target{"steam.config_vdf", L"config.vdf",
-                           L"DPAPI-encrypted JWT refresh tokens in ConnectCache. Surgically edited "
-                           L"so preserved accounts survive. Steam regenerates on next launch.",
+        t.push_back(Target{"steam.config_vdf", L"Saved sign-in tokens",
+                           L"Keep accounts signed in, so Steam asks for the password again. With an "
+                           L"excluded account only the others' entries go; otherwise Steam makes the "
+                           L"file anew. config\\config.vdf.",
                            TargetCategory::AccountResidue, &resolve_config_vdf});
-        t.push_back(Target{"steam.appcache_stats", L"Appcache stats",
-                           L"Per-game stats binary cache under <install>/appcache/stats.",
+        t.push_back(Target{"steam.appcache_stats", L"Game stats cache",
+                           L"Achievement and stats data saved for each game. Steam downloads it again. "
+                           L"appcache\\stats.",
                            TargetCategory::Cache, &resolve_appcache_stats});
-        t.push_back(Target{"steam.tenfoot_httpcache", L"Big Picture (tenfoot) HTTP cache",
-                           L"<install>/tenfoot/config/httpcache. Separate from the regular "
-                           L"htmlcache; covers Big Picture mode's CEF cache.",
+        t.push_back(Target{"steam.tenfoot_httpcache", L"Big Picture web cache",
+                           L"Web cache of Big Picture mode. Steam builds it again. "
+                           L"tenfoot\\config\\httpcache.",
                            TargetCategory::BrowserResidue, &resolve_tenfoot_httpcache});
-        t.push_back(Target{"steam.overlayhtmlcache", L"Steam Overlay HTML cache",
-                           L"<install>/config/overlayhtmlcache. CEF cache used by the in-game "
-                           L"overlay browser.",
+        t.push_back(Target{"steam.overlayhtmlcache", L"Overlay web cache",
+                           L"Web cache of the browser in the in-game overlay. Steam builds it again. "
+                           L"config\\overlayhtmlcache.",
                            TargetCategory::BrowserResidue, &resolve_overlayhtmlcache});
-        t.push_back(Target{"steam.steamapps_downloading", L"Partial downloads",
-                           L"<library>/steamapps/downloading on every Steam library drive. "
-                           L"Resumeable game-download chunks.",
+        t.push_back(Target{"steam.steamapps_downloading", L"Unfinished game downloads",
+                           L"Parts of installs and updates that did not finish. Steam downloads them "
+                           L"again from the start. steamapps\\downloading in each library.",
                            TargetCategory::Cache, &resolve_steamapps_downloading});
-        t.push_back(Target{"steam.reg.apps", L"HKCU\\...\\Steam\\Apps",
-                           L"Per-AppID registry subtree (last-played, language, install state). "
-                           L"Wholesale delete; Steam recreates entries as needed.",
+        t.push_back(Target{"steam.reg.apps", L"Per-game registry entries",
+                           L"What Steam noted for each game, such as language and install state. Steam "
+                           L"adds entries again as needed. HKCU\\Software\\Valve\\Steam\\Apps.",
                            TargetCategory::AccountResidue, &resolve_reg_apps});
-        t.push_back(Target{"steam.reg.url_handler", L"steam:// URL handler",
-                           L"Removes HKCR\\steam and HKCU\\Software\\Classes\\steam. Steam "
-                           L"re-registers the handler on next launch.",
+        t.push_back(Target{"steam.reg.url_handler", L"steam:// link handler",
+                           L"Lets links on websites open Steam. Steam registers it again when it starts. "
+                           L"HKCR\\steam and HKCU\\Software\\Classes\\steam.",
                            TargetCategory::AccountResidue, &resolve_reg_url_handler});
-        t.push_back(Target{"steam.userdata_shortcuts", L"Non-Steam game shortcuts",
-                           L"userdata\\<id>\\config\\shortcuts.vdf. Lists external apps you added "
-                           L"to your library. Per-account, ignore-list filtered.",
+        t.push_back(Target{"steam.userdata_shortcuts", L"Non-Steam games in your library",
+                           L"Programs you added to your Steam library yourself. They leave the library; "
+                           L"excluded accounts are skipped. userdata\\<id>\\config\\shortcuts.vdf.",
                            TargetCategory::AccountResidue, &resolve_userdata_shortcuts});
         t.push_back(Target{"steam.userdata_screenshots", L"Screenshots",
-                           L"userdata\\<id>\\760\\remote. Steam screenshot uploads. Per-account.",
+                           L"Screenshots taken with Steam, for each account. They are deleted from this "
+                           L"PC. userdata\\<id>\\760\\remote.",
                            TargetCategory::GameData, &resolve_userdata_screenshots});
         t.push_back(Target{"steam.userdata_inventory_cache", L"Inventory message cache",
-                           L"userdata\\<id>\\inventorymsgcache. Per-account, ignore-list filtered.",
+                           L"Inventory notifications saved for each account. Steam gets them again. "
+                           L"userdata\\<id>\\inventorymsgcache.",
                            TargetCategory::Cache, &resolve_userdata_inventory_cache});
-        t.push_back(Target{"steam.userdata_librarycache", L"Per-account library cache",
-                           L"userdata\\<id>\\config\\librarycache. Per-account thumbnails and "
-                           L"library metadata.",
+        t.push_back(Target{"steam.userdata_librarycache", L"Account library images",
+                           L"Library artwork and details saved for each account. Steam downloads them "
+                           L"again. userdata\\<id>\\config\\librarycache.",
                            TargetCategory::Cache, &resolve_userdata_librarycache});
-        t.push_back(Target{"steam.userdata_sharedconfig", L"sharedconfig.vdf",
-                           L"userdata\\<id>\\7\\remote\\sharedconfig.vdf. Holds library categories, "
-                           L"hidden-game flags, and tags. Per-account, ignore-list filtered.",
+        t.push_back(Target{"steam.userdata_sharedconfig", L"Collections and hidden games",
+                           L"Your library collections, hidden games and tags, for each account. They "
+                           L"come back only from a Steam Cloud copy. userdata\\<id>\\7\\remote\\sharedconfig.vdf.",
                            TargetCategory::AccountResidue, &resolve_userdata_sharedconfig});
-        t.push_back(Target{"steam.appmanifests", L"App manifests (installed-game records)",
-                           L"<library>/steamapps/appmanifest_*.acf across every library. Removes "
-                           L"the record of which games are installed. Opt-in: Steam will see "
-                           L"games as uninstalled until you re-add them.",
+        t.push_back(Target{"steam.appmanifests", L"Installed game records",
+                           L"The files that tell Steam a game is installed. Steam shows those games as "
+                           L"not installed until you add them back. steamapps\\appmanifest_*.acf in each library.",
                            TargetCategory::GameData, &resolve_appmanifests});
-        t.push_back(Target{"steam.local_vdf", L"local.vdf (machine-level ConnectCache)",
-                           L"%LOCALAPPDATA%/Steam/local.vdf. DPAPI-encrypted JWT refresh tokens "
-                           L"in ConnectCache. Surgically edited so preserved accounts survive.",
+        t.push_back(Target{"steam.local_vdf", L"Saved sign-in tokens (this PC)",
+                           L"PC-wide tokens that keep accounts signed in, so Steam asks for the password "
+                           L"again. With an excluded account only the others' entries go. "
+                           L"%LOCALAPPDATA%\\Steam\\local.vdf.",
                            TargetCategory::AccountResidue, &resolve_local_vdf});
-        t.push_back(Target{"steam.userdata_gamerecordings", L"Game recordings metadata",
-                           L"userdata\\<id>\\gamerecordings. Per-account gameplay recording "
-                           L"metadata. Filtered by ignore list.",
+        t.push_back(Target{"steam.userdata_gamerecordings", L"Game recording data",
+                           L"Steam Game Recording data for each account; excluded accounts are skipped. "
+                           L"userdata\\<id>\\gamerecordings.",
                            TargetCategory::GameData, &resolve_userdata_gamerecordings});
-        t.push_back(Target{"steam.userdata_ugcmsgcache", L"UGC message cache",
-                           L"userdata\\<id>\\ugcmsgcache. Per-account user-generated content "
-                           L"message cache. Filtered by ignore list.",
+        t.push_back(Target{"steam.userdata_ugcmsgcache", L"Workshop message cache",
+                           L"Workshop notifications saved for each account. Steam gets them again. "
+                           L"userdata\\<id>\\ugcmsgcache.",
                            TargetCategory::Cache, &resolve_userdata_ugcmsgcache});
         return t;
     }();

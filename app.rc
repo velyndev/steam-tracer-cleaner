@@ -1,15 +1,21 @@
 #include <winres.h>
 
 #define IDI_APP_ICON 101
+#define IDR_APP_ICON_SVG 102
+#define IDR_APP_ICON_SMALL_SVG 103
 
+// The window and shell icon (frames rendered from the SVGs by tools/make_icon.py).
 IDI_APP_ICON ICON "assets/icon.ico"
+// The same drawings as SVG text, rasterized by Facet for the title bar (ui/assets.cpp).
+IDR_APP_ICON_SVG RCDATA "assets/icon.svg"
+IDR_APP_ICON_SMALL_SVG RCDATA "assets/icon-small.svg"
 
-// The manifest is added to the link via the project's <Manifest><AdditionalManifestFiles> entry,
-// so it should not also be embedded as a resource here.
+// app.manifest is a source of the CMake target (app/CMakeLists.txt): the linker merges it into
+// the manifest it embeds, so it must not also be embedded as a resource here.
 
 VS_VERSION_INFO VERSIONINFO
-    FILEVERSION    1,1,2,0
-    PRODUCTVERSION 1,1,2,0
+    FILEVERSION    2,0,0,0
+    PRODUCTVERSION 2,0,0,0
     FILEFLAGSMASK  0x3fL
 #ifdef _DEBUG
     FILEFLAGS      0x1L
@@ -26,12 +32,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName",      "luminary"
             VALUE "FileDescription",  "Cleans Steam account residue and installs autoexec / video configs"
-            VALUE "FileVersion",      "1.1.2.0"
+            VALUE "FileVersion",      "2.0.0.0"
             VALUE "InternalName",     "steam-tracer-cleaner"
             VALUE "LegalCopyright",   "Copyright (c) 2026 luminary-cloud"
             VALUE "OriginalFilename", "steam-tracer-cleaner.exe"
             VALUE "ProductName",      "Steam Tracer Cleaner"
-            VALUE "ProductVersion",   "1.1.2.0"
+            VALUE "ProductVersion",   "2.0.0.0"
         END
     END
     BLOCK "VarFileInfo"

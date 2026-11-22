@@ -252,6 +252,7 @@ bool restore(const Entry& e) {
             }
             auto dst = fs_std::path{drive} / remainder;
             if (!stc::platform::fsx::copy_file(it->path(), dst)) {
+                spdlog::warn("Restore: could not copy back {}", dst.string());
                 all_ok = false;
             }
         }
@@ -267,6 +268,7 @@ bool restore(const Entry& e) {
             }
             std::wstring cmd = L"reg.exe import \"" + it->path().wstring() + L"\"";
             if (!run_reg_command(cmd)) {
+                spdlog::warn("Restore: could not import {}", it->path().string());
                 all_ok = false;
             }
         }
