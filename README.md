@@ -4,6 +4,7 @@
 
 [![CI](https://github.com/velyndev/steam-tracer-cleaner/actions/workflows/ci.yml/badge.svg)](https://github.com/velyndev/steam-tracer-cleaner/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/velyndev/steam-tracer-cleaner)](https://github.com/velyndev/steam-tracer-cleaner/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/velyndev/steam-tracer-cleaner/total)](https://github.com/velyndev/steam-tracer-cleaner/releases)
 [![License](https://img.shields.io/github/license/velyndev/steam-tracer-cleaner)](LICENSE)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011%20x64-0078D6)
 
