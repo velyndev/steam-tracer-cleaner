@@ -43,8 +43,8 @@ freeze the window. The cleaning rules themselves are the ones from 1.1.2.
   and Delete in a menu. Restore and delete ask first and run in the background. Restore warns
   when Steam is running.
 - Exclusions is a page of its own (it was the "Ignore list" inside Settings). Accounts found on
-  the PC are switches; Steam IDs of other accounts, paths and registry entries are validated
-  as you type. The page says up front what is currently kept.
+  the PC are switches; Steam IDs of other accounts and registry entries are validated as you
+  type. The page says up front what is currently kept.
 - Audit leads with a summary, shows each account with what Steam keeps for it, and lets you
   exclude an account from cleanups directly. Values can be copied; the report can be exported.
 - Configs shows the library and a preview of the selected file side by side. Installing CS2
